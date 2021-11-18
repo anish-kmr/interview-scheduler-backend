@@ -1,5 +1,6 @@
 import Meeting from "../models/meeting.js"
 import Participant from "../models/participant.js"
+import sendEmail from "../utils/emailService.js"
 import { config } from "dotenv";
 
 config();
@@ -57,6 +58,8 @@ const createMeeting = async (req, res) => {
             return res.status(400).json({ success: false, err: "Participants not available in seleted Time Range" })
         }
         let newMeeting = await Meeting.create(meeting)
+        let participants = await Participant.find({ _id: { $in: meeting.participants } })
+        await sendEmail(newMeeting, participants)
         return res.status(200).json({ success: true, meeting: newMeeting })
     }
     catch (err) {
